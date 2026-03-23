@@ -6,6 +6,7 @@ A super simple FastAPI application that allows students to view and sign up for 
 
 - View all available extracurricular activities
 - Sign up for activities
+- Data persists across server restarts with SQLite
 
 ## Getting Started
 
@@ -18,7 +19,7 @@ A super simple FastAPI application that allows students to view and sign up for 
 2. Run the application:
 
    ```
-   python app.py
+   uvicorn app:app --reload
    ```
 
 3. Open your browser and go to:
@@ -31,20 +32,32 @@ A super simple FastAPI application that allows students to view and sign up for 
 | ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GET    | `/activities`                                                     | Get all activities with their details and current participant count |
 | POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up for an activity                                             |
+| DELETE | `/activities/{activity_name}/unregister?email=student@mergington.edu` | Unregister a student from an activity                            |
 
 ## Data Model
 
-The application uses a simple data model with meaningful identifiers:
+The application now uses SQLite (`school.db`) and initializes schema on startup.
 
-1. **Activities** - Uses activity name as identifier:
+Tables:
+
+1. **activities**
 
    - Description
    - Schedule
    - Maximum number of participants allowed
-   - List of student emails who are signed up
+   - Unique activity name
 
-2. **Students** - Uses email as identifier:
-   - Name
-   - Grade level
+2. **users**
 
-All data is stored in memory, which means data will be reset when the server restarts.
+   - Email (primary key)
+
+3. **registrations**
+
+   - Many-to-many link between activities and users
+
+## Database Initialization and Reset
+
+- On first startup, the app creates tables and seeds default activities.
+- DB file location: `src/school.db`
+- To reset to a clean seeded state, stop the server and delete `src/school.db`, then restart.
+
